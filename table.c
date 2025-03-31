@@ -10,9 +10,6 @@ Table* newTable()
 
     Table* table = (Table*)malloc(sizeof(Table));
     table->num_rows = 0;
-
-    printf("The maximum number of rows is : %d\n", TABLE_MAX_ROWS);
-    printf("The numbers of rows per page is : %d\n", ROWS_PER_PAGE);
     
     if (!table)
     {
@@ -52,12 +49,11 @@ void* rowSlot(Table* table, uint32_t rowNum)
     if (page == NULL) // Allocate memory when we try to access the page for the first time
     {
         table->pages[pageNum] = malloc(PAGE_SIZE);
+        // printf("A new page was allocated\n");
     }
     
     page = table->pages[pageNum];
     uint32_t byteOffset = rowOffset * ROW_SIZE;
-
-    printf("The current byteOffset is : %u\n", byteOffset);
 
     return (char*)page + byteOffset;
 }
