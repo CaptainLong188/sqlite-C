@@ -2,107 +2,13 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include "input.h"
 #include "row.h"
 #include "table.h"
-
-/* Manage user input */
-typedef struct 
-{
-    char* buffer;
-    size_t buffer_length;
-    size_t input_length;
-
-} InputBuffer;
-
-int getline_win(char** lineptr, size_t* n, FILE* stream)
-{
-    if (lineptr == NULL || n == NULL || stream == NULL)
-    {
-        return -1;
-    }
-
-    const int INITIAL_BUFFER_SIZE = 128;
-
-    if (*lineptr == NULL || *n == 0)
-    {
-        *n = INITIAL_BUFFER_SIZE; // Initial buffer size
-        *lineptr = (char*) malloc(INITIAL_BUFFER_SIZE);
-
-        if (lineptr == NULL) 
-        {
-            return -1;
-        }
-    }
-
-    size_t pos = 0;
-    int ch; // use int to handle EOF
-
-    while ((ch = fgetc(stream)) != EOF)
-    {
-        // Resize buffer if needed
-        if (pos + 1 >= *n)
-        {
-            (*n) *= 2;
-            char* temp = (char*) realloc(*lineptr, *n); // prevents loosing the original pointer
-            
-            if (temp == NULL)
-            {
-                return -1;
-            }
-            
-            *lineptr = temp;
-        }
-
-        (*lineptr)[pos++] = ch;
-
-        if (ch == '\n') { break; }
-    }
-
-    (*lineptr)[pos] = '\0';
-    return pos;
-}
-
-InputBuffer* newInputBuffer()
-{
-    InputBuffer* input_buffer = (InputBuffer*)malloc(sizeof(InputBuffer));
-    
-    if (!input_buffer)
-    {
-        fprintf(stderr, "Memory allocation failed (input)\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    input_buffer->buffer = NULL;
-    input_buffer->buffer_length = 0;
-    input_buffer->input_length = 0;
-
-    return input_buffer;
-}
 
 void printPrompt()
 {
     printf("db > ");
-}
-
-void readInputData(InputBuffer* input_buffer)
-{
-    int bytes_read = getline_win(&(input_buffer->buffer), &(input_buffer->buffer_length), stdin); // includes newline
-    
-    if (bytes_read == -1) 
-    {
-        fprintf(stderr, "Error reading input\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    // Ignore trailing newline
-    input_buffer->input_length = (size_t)bytes_read - 1;
-    input_buffer->buffer[bytes_read - 1] = '\0';
-}
-
-void closeInputBuffer(InputBuffer* input_buffer)
-{
-    free(input_buffer->buffer);
-    free(input_buffer);
 }
 
 typedef enum
