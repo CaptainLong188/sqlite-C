@@ -2,7 +2,7 @@
 
 InputBuffer* newInputBuffer(void)
 {
-    InputBuffer* inputBuffer = (InputBuffer*)malloc(sizeof(inputBuffer));
+    InputBuffer* inputBuffer = (InputBuffer*)malloc(sizeof(InputBuffer));
 
     if (!inputBuffer)
     {

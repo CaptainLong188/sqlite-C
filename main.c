@@ -49,7 +49,7 @@ MetaCommandResult doMetaCommand(InputBuffer* input_buffer, Table* table)
     if (strcmp(input_buffer->buffer, ".exit") == 0)
     {
         closeInputBuffer(input_buffer);
-        freeTable(table);
+        dbClose(table);
         exit(EXIT_SUCCESS);
     }
     else if (strcmp(input_buffer->buffer, ".help") == 0)
@@ -70,12 +70,12 @@ PreparateResult prepareStatement(InputBuffer* input_buffer, Statement* statement
         statement->type = STATEMENT_INSERT;
         const char* del = " ";
 
-        char* keyword = strtok(input_buffer->buffer, del);
+        char* keyword = strtok(input_buffer->buffer, del); // For now unused
         char* id_string = strtok(NULL, del);
         char* username = strtok(NULL, del);
         char* email = strtok(NULL, del);
 
-        if (id_string == NULL || username == NULL || email == NULL)
+        if (keyword == NULL || id_string == NULL || username == NULL || email == NULL)
         {
             return PREPARE_SYNTAX_ERROR;
         }
@@ -96,14 +96,6 @@ PreparateResult prepareStatement(InputBuffer* input_buffer, Statement* statement
         strcpy(statement->row_to_insert.username, username);
         strcpy(statement->row_to_insert.email, email);
 
-        // int args =  sscanf(input_buffer->buffer, "insert %d %s %s", &(statement->row_to_insert.id), 
-        //             statement->row_to_insert.username, statement->row_to_insert.email);
-
-        // if (args < 3)
-        // {
-        //     return PREPARE_SYNTAX_ERROR;
-        // }
-        
         return PREPARE_SUCCESS;
     }
 
@@ -151,19 +143,28 @@ ExecuteResult executeStatement(Statement* statement, Table* table)
 {
     switch (statement->type)
     {
-        case STATEMENT_SELECT:
-            return executeSelect(statement, table);
-        
         case STATEMENT_INSERT:
             return executeInsert(statement, table);
+        
+        case STATEMENT_SELECT:
+            return executeSelect(statement, table);
     }
+
+    return EXECUTE_SUCCESS;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     
+    if (argc < 2)
+    {
+        fprintf(stderr, "Must supply a database filename.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    const char* filename = argv[1];
     InputBuffer* input_buffer = newInputBuffer();
-    Table* table = newTable();
+    Table* table = dbOpen(filename);
 
     while (true)
     {
